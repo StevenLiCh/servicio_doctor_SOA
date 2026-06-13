@@ -426,8 +426,6 @@
 
     <nav class="menu">
       <button data-vista="resumen" class="activo">Resumen</button>
-      <button data-vista="orden">Orden médica</button>
-      <button data-vista="receta">Receta</button>
       <button data-vista="consulta">Consultar paciente</button>
       <button data-vista="recetas-paciente">Recetas de paciente</button>
       <button data-vista="citas">Ver citas</button>
@@ -491,6 +489,16 @@
           <button type="submit" class="btn-primary">Registrar diagnóstico</button>
         </form>
         <div class="resultado" id="resultado-diagnostico"></div>
+
+        <!-- NUEVO: Continuidad del flujo — solo aparece tras un registro exitoso -->
+        <div id="diagnostico-continuar" class="fila" style="display:none; margin-top:14px;">
+          <button type="button" class="btn-secundario" onclick="irAOrdenDesdeDiagnostico()">
+            Ir a Orden médica
+          </button>
+          <button type="button" class="btn-secundario" onclick="irARecetaDesdeDiagnostico()">
+            Ir a Receta
+          </button>
+        </div>
       </div>
     </section>
 
@@ -847,6 +855,33 @@ function irADiagnosticoDesdeCita(pacienteId){
   if (form && form.paciente_id){
     form.paciente_id.value = pacienteId;
   }
+
+  // Ocultar resultados/botones de continuidad de un diagnóstico anterior
+  document.getElementById("diagnostico-continuar").style.display = "none";
+  document.getElementById("resultado-diagnostico").classList.remove("visible");
+}
+
+// ── NUEVO: continuar el flujo desde Diagnóstico hacia Orden médica ───────────
+// Usa el paciente_id guardado tras registrar el diagnóstico exitosamente
+function irAOrdenDesdeDiagnostico(){
+  const pacienteId = window._pacienteEnCurso;
+  irASeccion("orden");
+
+  const form = document.getElementById("form-orden");
+  if (form && form.paciente_id && pacienteId){
+    form.paciente_id.value = pacienteId;
+  }
+}
+
+// ── NUEVO: continuar el flujo desde Diagnóstico hacia Receta ─────────────────
+function irARecetaDesdeDiagnostico(){
+  const pacienteId = window._pacienteEnCurso;
+  irASeccion("receta");
+
+  const form = document.getElementById("form-receta");
+  if (form && form.paciente_id && pacienteId){
+    form.paciente_id.value = pacienteId;
+  }
 }
 
 document.querySelectorAll("nav.menu button").forEach(btn => {
@@ -967,9 +1002,15 @@ document.getElementById("form-diagnostico").addEventListener("submit", async (e)
       body: JSON.stringify(body)
     });
     mostrarResultado("resultado-diagnostico", data);
+
+    // NUEVO: guardamos el paciente para continuar el flujo y mostramos los botones
+    window._pacienteEnCurso = body.paciente_id;
+    document.getElementById("diagnostico-continuar").style.display = "flex";
+
     form.reset();
   }catch(err){
     mostrarResultado("resultado-diagnostico", err.message, true);
+    document.getElementById("diagnostico-continuar").style.display = "none";
   }
 });
 

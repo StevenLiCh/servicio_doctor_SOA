@@ -49,6 +49,15 @@ class OrdenMedica(Base):
     resultado         = Column(Text)
     creado_en         = Column(DateTime,   default=datetime.utcnow)
 
+# ── NUEVO: modelo para verificar que exista un diagnóstico previo ────────────
+class Diagnostico(Base):
+    __tablename__  = "diagnosticos"
+    __table_args__ = {"schema": "doctores", "extend_existing": True}
+
+    id          = Column(Integer, primary_key=True)
+    paciente_id = Column(Integer, nullable=False)
+    doctor_id   = Column(Integer, nullable=False)
+
 # ── Schemas Pydantic ──────────────────────────────────────────────────────────
 class OrdenCreate(BaseModel):
     """CONTRATO DE ENTRADA"""
@@ -113,6 +122,20 @@ def post_doctor_orden_medica(
         raise HTTPException(
             status_code = 404,
             detail      = f"Doctor ID {datos.doctor_id} no encontrado"
+        )
+
+    # ── NUEVO REGLA 1.5: Debe existir un diagnóstico previo del paciente ──────
+    # Una orden médica solo se puede emitir si el doctor ya diagnosticó al paciente
+    diagnostico_existente = db.query(Diagnostico).filter(
+        Diagnostico.paciente_id == datos.paciente_id,
+        Diagnostico.doctor_id   == datos.doctor_id
+    ).first()
+
+    if not diagnostico_existente:
+        raise HTTPException(
+            status_code = 400,
+            detail      = "No puedes emitir una orden médica sin un diagnóstico previo "
+                          "de este paciente. Registra primero el diagnóstico."
         )
 
     # ── REGLA 2: Tipo de orden válido ─────────────────────────────────────────
