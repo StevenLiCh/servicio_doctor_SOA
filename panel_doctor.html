@@ -787,6 +787,7 @@
             <input type="text" id="config-base-citas" placeholder="https://api-clinica-soa.onrender.com" />
           </div>
           <button type="button" class="btn-secundario" onclick="guardarConfigCitas()">Guardar</button>
+          <button type="button" class="btn-secundario" onclick="probarConexionCitas()">Probar conexión</button>
         </div>
         <div class="resultado" id="resultado-config-citas"></div>
       </div>
@@ -1456,6 +1457,27 @@ function guardarConfigCitas(){
   localStorage.setItem(CLAVE_BASE_CITAS, valor);
   mostrarResultado("resultado-config-citas", { mensaje: "URL guardada", url: valor });
   mostrarToast("URL del ServicioClinicas guardada");
+}
+
+// NUEVO: prueba la conexión contra el ServicioClinicas usando una fecha
+// de hoy como llamada de verificación (no requiere token)
+async function probarConexionCitas(){
+  const base = obtenerBaseCitas();
+  const hoy = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+
+  try{
+    const resp = await fetch(`${base}/clinica/citas/${hoy}`);
+
+    if (!resp.ok){
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    mostrarResultado("resultado-config-citas", { estado: "Conexión exitosa", url: base });
+    mostrarToast("Conexión exitosa con ServicioClinicas");
+  }catch(err){
+    mostrarResultado("resultado-config-citas", { estado: "No se pudo conectar", error: err.message }, true);
+    mostrarToast("Sin conexión con ServicioClinicas", true);
+  }
 }
 
 async function probarConexionDoctor(){
