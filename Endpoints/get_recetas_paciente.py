@@ -82,7 +82,7 @@ def get_recetas_paciente(
   #      raise HTTPException(
   #          status_code = 403,
   #          detail      = "No puedes consultar recetas usando el ID de otro doctor"
-        )
+   #     )
 
     # ── REGLA 1: Doctor existe ────────────────────────────────────────────────
     doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
