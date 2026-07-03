@@ -28,11 +28,13 @@ from Endpoints.get_recetas_paciente     import router as router_recetas
 from Endpoints.get_doctores             import router as router_doctores
 from Endpoints.get_recetas_por_paciente import router as router_recetas_paciente_publico
 
+
 # ── NUEVO: Endpoints de autenticación (login) ─────────────────────────────────
 # post_auth_registro → POST /auth/registro  (admin asigna contraseña a un doctor)
 # post_auth_login    → POST /auth/login     (doctor inicia sesión y recibe JWT)
 from Endpoints.post_auth_registro import router as router_registro
 from Endpoints.post_auth_login    import router as router_login
+from Endpoints.post_auth_verificar import router as router_verificar
 
 # ── Inicializar FastAPI ───────────────────────────────────────────────────────
 app = FastAPI(
@@ -80,6 +82,7 @@ app.include_router(router_recetas_paciente_publico)  # GET /pacientes/{paciente_
 # ── NUEVO: Registrar endpoints de autenticación ───────────────────────────────
 app.include_router(router_registro)     # POST /auth/registro
 app.include_router(router_login)        # POST /auth/login
+app.include_router(router_verificar)     # POST /auth/verificar
 
 # ── Health Check ──────────────────────────────────────────────────────────────
 @app.get("/", tags=["ServicioDoctores"])

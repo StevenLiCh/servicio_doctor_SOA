@@ -81,27 +81,6 @@
     margin-top:2px;
   }
 
-  /* ============================================================
-   BUSCADOR DNI
-   ============================================================ */
-.buscador-inline{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.buscador-inline input{
-  flex:1;
-  min-width:220px;
-  margin-bottom:0;
-}
-
-.buscador-inline .btn-primary{
-  width:auto;          /* Anula el width:100% global */
-  min-width:120px;
-  flex-shrink:0;
-}
-
   /* Línea de pulso (ECG) — elemento distintivo */
   .pulso{
     width:100%;
@@ -476,7 +455,7 @@
 <body>
 
 <!-- ============================================================
-     VISTA 1: LOGIN
+     VISTA 1: LOGIN (PASO 1 — credenciales)
      ============================================================ -->
 <div id="vista-login">
   <div class="login-card">
@@ -504,6 +483,49 @@
 
       <button type="submit" class="btn-primary">Iniciar sesión</button>
     </form>
+  </div>
+</div>
+
+<!-- ============================================================
+     VISTA 1B: VERIFICACIÓN 2FA (PASO 2 — código por email)
+     ============================================================ -->
+<div id="vista-2fa" style="display:none; min-height:100vh; align-items:center; justify-content:center; padding:24px; background:var(--bg);">
+  <div class="login-card">
+    <div class="login-brand">
+      <span class="dot"></span>
+      <div>
+        <h1>EcoSalud</h1>
+        <span>Verificación de identidad</span>
+      </div>
+    </div>
+
+    <svg class="pulso" viewBox="0 0 340 34" preserveAspectRatio="none">
+      <path d="M0,17 L60,17 L75,4 L90,30 L105,17 L150,17 L165,8 L180,26 L195,17 L340,17"/>
+    </svg>
+
+    <!-- Info del email al que se envió el código -->
+    <div id="2fa-info" style="background:var(--primary-soft); border-radius:10px; padding:14px 16px; margin-bottom:18px; font-size:14px; color:var(--primary-dark);">
+      📧 Código enviado a <strong id="2fa-email-destino">***@***.com</strong><br>
+      <span style="font-size:12px; color:var(--ink-soft);">Revisa tu bandeja de entrada. Válido por 5 minutos.</span>
+    </div>
+
+    <div id="2fa-error" class="mensaje-error"></div>
+
+    <form id="form-2fa">
+      <label for="codigo-2fa">Código de verificación</label>
+      <input id="codigo-2fa" type="text" placeholder="123456"
+        maxlength="6" autocomplete="one-time-code"
+        style="font-size:28px; letter-spacing:10px; text-align:center; font-family:var(--font-mono);"
+        required />
+
+      <button type="submit" class="btn-primary" style="margin-top:8px;">Verificar código</button>
+    </form>
+
+    <button type="button" class="btn-secundario"
+      style="width:100%; margin-top:12px; font-size:13px;"
+      onclick="volverAlLogin()">
+      ← Volver al inicio de sesión
+    </button>
   </div>
 </div>
 
@@ -719,12 +741,12 @@
     <section id="seccion-consulta" class="seccion" style="display:none;">
       <h2>Consultar paciente</h2>
       <p class="subtitulo">Busca por DNI → datos del paciente + historial clínico (ServicioPaciente)</p>
-      <div class="buscador-inline">
+      <div class="card">
         <label>Buscar paciente por DNI</label>
         <div style="display:flex; gap:10px; align-items:center; margin-bottom:0;">
-          <input type="text" id="consulta-dni" placeholder="Ej: 12345678"
+          <input type="text" id="consulta-dni" placeholder="Ej: 12345678" style="flex:1; margin-bottom:0;"
             onkeydown="if(event.key==='Enter') buscarPacienteConsulta()" />
-          <button type="button" class="btn-primary" onclick="buscarPacienteConsulta()">Buscar</button>
+          <button type="button" class="btn-primary" style="flex-shrink:0;" onclick="buscarPacienteConsulta()">Buscar</button>
         </div>
       </div>
 
@@ -750,12 +772,12 @@
     <section id="seccion-recetas-paciente" class="seccion" style="display:none;">
       <h2>Recetas del paciente</h2>
       <p class="subtitulo">Busca por DNI → recetas del paciente (ServicioPaciente)</p>
-      <div class="buscador-inline">
+      <div class="card">
         <label>Buscar paciente por DNI</label>
         <div style="display:flex; gap:10px; align-items:center; margin-bottom:0;">
-          <input type="text" id="recetas-pac-dni" placeholder="Ej: 12345678"
+          <input type="text" id="recetas-pac-dni" placeholder="Ej: 12345678" style="flex:1; margin-bottom:0;"
             onkeydown="if(event.key==='Enter') buscarRecetasPaciente()" />
-          <button type="button" class="btn-primary" onclick="buscarRecetasPaciente()">Buscar</button>
+          <button type="button" class="btn-primary" style="flex-shrink:0;" onclick="buscarRecetasPaciente()">Buscar</button>
         </div>
       </div>
 
@@ -1025,11 +1047,27 @@ async function apiFetch(ruta, opciones = {}){
 }
 
 /* ============================================================
-   CAMBIO DE VISTA: LOGIN <-> PANEL
+   CAMBIO DE VISTA: LOGIN / 2FA / PANEL
    ============================================================ */
 function mostrarLogin(){
-  document.getElementById("vista-login").style.display = "flex";
+  document.getElementById("vista-login").style.display      = "flex";
+  document.getElementById("vista-2fa").style.display        = "none";
   document.getElementById("vista-panel").classList.remove("activo");
+}
+
+function mostrar2FA(emailDestino){
+  document.getElementById("vista-login").style.display      = "none";
+  document.getElementById("vista-2fa").style.display        = "flex";
+  document.getElementById("vista-panel").classList.remove("activo");
+  document.getElementById("2fa-email-destino").textContent  = emailDestino;
+  document.getElementById("codigo-2fa").value               = "";
+  document.getElementById("2fa-error").classList.remove("visible");
+  document.getElementById("codigo-2fa").focus();
+}
+
+function volverAlLogin(){
+  localStorage.removeItem("ecosalud_2fa_doctor_id");
+  mostrarLogin();
 }
 
 function mostrarPanel(){
@@ -1037,27 +1075,26 @@ function mostrarPanel(){
   if (!doctor) return mostrarLogin();
 
   document.getElementById("vista-login").style.display = "none";
+  document.getElementById("vista-2fa").style.display   = "none";
   document.getElementById("vista-panel").classList.add("activo");
 
-  document.getElementById("info-nombre").textContent = doctor.nombre;
+  document.getElementById("info-nombre").textContent       = doctor.nombre;
   document.getElementById("info-especialidad").textContent = doctor.especialidad;
-  document.getElementById("info-colegiatura").textContent = doctor.numero_colegiatura;
+  document.getElementById("info-colegiatura").textContent  = doctor.numero_colegiatura;
 
-  // NUEVO: restaurar el widget "Atención en curso" si había una activa
   actualizarWidgetAtencion();
-
   cargarResumen();
 }
 
 /* ============================================================
-   LOGIN
+   LOGIN — PASO 1: enviar credenciales → recibir código por email
    ============================================================ */
 document.getElementById("form-login").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const colegiatura = document.getElementById("login-colegiatura").value.trim();
-  const password = document.getElementById("login-password").value;
-  const errorBox = document.getElementById("login-error");
+  const password    = document.getElementById("login-password").value;
+  const errorBox    = document.getElementById("login-error");
   errorBox.classList.remove("visible");
 
   try{
@@ -1073,6 +1110,50 @@ document.getElementById("form-login").addEventListener("submit", async (e) => {
       throw new Error(data.detail || "No se pudo iniciar sesión");
     }
 
+    // PASO 1 exitoso: guardar temporalmente el doctor_id para el PASO 2
+    localStorage.setItem("ecosalud_2fa_doctor_id", data.doctor_id);
+
+    // Mostrar la pantalla de verificación del código
+    mostrar2FA(data.email_destino);
+
+  }catch(err){
+    errorBox.textContent = err.message;
+    errorBox.classList.add("visible");
+  }
+});
+
+/* ============================================================
+   2FA — PASO 2: verificar código → recibir JWT y entrar al panel
+   ============================================================ */
+document.getElementById("form-2fa").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const codigo   = document.getElementById("codigo-2fa").value.trim();
+  const doctorId = localStorage.getItem("ecosalud_2fa_doctor_id");
+  const errorBox = document.getElementById("2fa-error");
+  errorBox.classList.remove("visible");
+
+  if (!doctorId){
+    errorBox.textContent = "Sesión expirada. Vuelve a iniciar sesión.";
+    errorBox.classList.add("visible");
+    return;
+  }
+
+  try{
+    const resp = await fetch(obtenerBaseDoctorUrl() + "/auth/verificar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ doctor_id: Number(doctorId), codigo: codigo })
+    });
+
+    const data = await resp.json();
+
+    if (!resp.ok){
+      throw new Error(data.detail || "Código incorrecto");
+    }
+
+    // PASO 2 exitoso: guardar la sesión completa y entrar al panel
+    localStorage.removeItem("ecosalud_2fa_doctor_id");
     guardarSesion(data);
     mostrarPanel();
 
