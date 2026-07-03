@@ -1,21 +1,16 @@
 # ============================================================
 # ENDPOINT: POST /auth/login
 # Servicio: ServicioDoctor
-# Acción: PASO 1 del login con 2FA
-#         Verifica colegiatura + password y si son correctos,
-#         envía un código de 6 dígitos al email del doctor.
-#         El JWT se entrega solo cuando el doctor verifica el código
-#         en el endpoint POST /auth/verificar (PASO 2).
-# Tablas BD: doctores.doctores, doctores.doctor_credenciales,
-#            doctores.codigos_2fa
+# Acción: El doctor inicia sesión con colegiatura + contraseña
+# Retorna: Token JWT que debe usar en los demás endpoints
+# Tabla BD: doctores.doctor_credenciales + doctores.doctores
 # ============================================================
 
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from database import SessionLocal, Base
-
-from auth.email_config import enviar_codigo_2fa
+from auth.jwt_config import crear_token
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -23,15 +18,18 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from pydantic import BaseModel
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-import random
 
 router = APIRouter()
 
 # ── Configuración de bcrypt ───────────────────────────────────────────────────
+# Mismo contexto que en registro para que los hashes sean compatibles
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 # ── Modelos ORM ───────────────────────────────────────────────────────────────
+
 class Doctor(Base):
+    """Mapea doctores.doctores — para obtener nombre y especialidad del doctor"""
     __tablename__  = "doctores"
     __table_args__ = {"schema": "doctores", "extend_existing": True}
 
@@ -39,10 +37,11 @@ class Doctor(Base):
     nombres      = Column(String(100))
     apellidos    = Column(String(100))
     especialidad = Column(String(100))
-    email        = Column(String(100))
     activo       = Column(Boolean, default=True)
 
+
 class DoctorCredencial(Base):
+    """Mapea doctores.doctor_credenciales — para verificar la contraseña"""
     __tablename__  = "doctor_credenciales"
     __table_args__ = {"schema": "doctores", "extend_existing": True}
 
@@ -52,35 +51,41 @@ class DoctorCredencial(Base):
     password_hash      = Column(String(255), nullable=False)
     activo             = Column(Boolean,     default=True)
 
-class Codigo2FA(Base):
-    """Mapea doctores.codigos_2fa — códigos temporales de verificación"""
-    __tablename__  = "codigos_2fa"
-    __table_args__ = {"schema": "doctores", "extend_existing": True}
-
-    id        = Column(Integer,   primary_key=True)
-    doctor_id = Column(Integer,   nullable=False)
-    codigo    = Column(String(6), nullable=False)
-    expira_en = Column(DateTime,  nullable=False)
-    usado     = Column(Boolean,   default=False)
-    creado_en = Column(DateTime,  default=datetime.utcnow)
 
 # ── Schemas Pydantic ──────────────────────────────────────────────────────────
+
 class LoginRequest(BaseModel):
-    """CONTRATO DE ENTRADA — lo que el doctor envía para iniciar sesión"""
+    """
+    CONTRATO DE ENTRADA
+    Lo que el doctor envía para hacer login
+    """
+    # El número de colegiatura como usuario (ej: "CMP-001")
     numero_colegiatura: str
-    password:           str
+
+    # La contraseña en texto plano (solo viaja en HTTPS, nunca se guarda así)
+    password: str
+
 
 class LoginResponse(BaseModel):
     """
-    CONTRATO DE SALIDA del PASO 1
-    Ya NO devuelve el JWT — devuelve confirmación de que el código fue enviado.
-    El JWT se entrega en POST /auth/verificar (PASO 2).
+    CONTRATO DE SALIDA
+    Lo que devolvemos al doctor cuando el login es exitoso
     """
-    mensaje:            str
-    codigo_enviado:     bool
-    email_destino:      str   # Solo los primeros caracteres (por seguridad)
+    # El token JWT — el doctor debe guardarlo y enviarlo en cada request
+    access_token: str
+
+    # Siempre "bearer" — es el tipo estándar de token
+    token_type: str
+
+    # Información del doctor autenticado (para que el frontend la muestre)
     doctor_id:          int
-    expira_en_minutos:  int
+    nombre:             str
+    especialidad:       str
+    numero_colegiatura: str
+
+    # Cuántos minutos dura el token
+    expira_en_minutos: int
+
 
 # ── Dependencia BD ────────────────────────────────────────────────────────────
 def get_db():
@@ -90,18 +95,6 @@ def get_db():
     finally:
         db.close()
 
-# ── FUNCIÓN: Enmascarar email ─────────────────────────────────────────────────
-def enmascarar_email(email: str) -> str:
-    """
-    Muestra el email parcialmente por seguridad.
-    Ej: ana.torres@hospital.com → a**@hospital.com
-    """
-    try:
-        usuario, dominio = email.split("@")
-        usuario_oculto = usuario[0] + "**"
-        return f"{usuario_oculto}@{dominio}"
-    except Exception:
-        return "***@***.com"
 
 # ── ENDPOINT ──────────────────────────────────────────────────────────────────
 @router.post(
@@ -109,103 +102,95 @@ def enmascarar_email(email: str) -> str:
     response_model = LoginResponse,
     status_code    = 200,
     tags           = ["Autenticación"],
-    summary        = "Login del doctor — PASO 1 (envía código 2FA al email)",
+    summary        = "Login del doctor",
     description    = """
-    PASO 1 del login con doble autenticación.
-    Verifica las credenciales del doctor y si son correctas,
-    envía un código de 6 dígitos al email registrado.
-
-    El token JWT se entrega en el PASO 2:
-        POST /auth/verificar → con el código recibido por email.
+    El doctor inicia sesión con su número de colegiatura y contraseña.
+    Si las credenciales son correctas, recibe un token JWT.
+    Ese token debe enviarse en el header de los endpoints protegidos:
+        Authorization: Bearer <token>
     """
 )
 def post_auth_login(
     datos: LoginRequest,
     db:    Session = Depends(get_db)
 ):
+    # Limpiamos el número de colegiatura (quitamos espacios, ponemos mayúsculas)
     colegiatura = datos.numero_colegiatura.strip().upper()
 
-    # ── PASO 1: Buscar credenciales ───────────────────────────────────────────
+    # ── PASO 1: Buscar las credenciales por número de colegiatura ────────────
     credencial = db.query(DoctorCredencial).filter(
         DoctorCredencial.numero_colegiatura == colegiatura
     ).first()
 
-    # Mismo error si no existe o si la contraseña es incorrecta (seguridad)
-    if not credencial or not credencial.activo:
+    # IMPORTANTE: Si las credenciales no existen O la contraseña es incorrecta,
+    # devolvemos el MISMO error. Esto es intencional por seguridad:
+    # no queremos revelar si el usuario existe o no.
+    if not credencial:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail      = "Número de colegiatura o contraseña incorrectos",
             headers     = {"WWW-Authenticate": "Bearer"}
         )
 
-    # ── PASO 2: Verificar contraseña ──────────────────────────────────────────
-    if not pwd_context.verify(datos.password[:72], credencial.password_hash):
+    # ── PASO 2: Verificar que las credenciales estén activas ─────────────────
+    if not credencial.activo:
+        raise HTTPException(
+            status_code = status.HTTP_401_UNAUTHORIZED,
+            detail      = "Esta cuenta está desactivada. Contacta al administrador.",
+            headers     = {"WWW-Authenticate": "Bearer"}
+        )
+
+    # ── PASO 3: Verificar la contraseña con bcrypt ───────────────────────────
+    # pwd_context.verify() compara la contraseña en texto plano
+    # contra el hash guardado en la BD — NUNCA desencripta el hash
+    # Retorna True si coinciden, False si no
+    password_correcta = pwd_context.verify(datos.password, credencial.password_hash)
+
+    if not password_correcta:
+        # Mismo error que arriba (no revelamos si fue el usuario o la contraseña)
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
             detail      = "Número de colegiatura o contraseña incorrectos",
             headers     = {"WWW-Authenticate": "Bearer"}
         )
 
-    # ── PASO 3: Obtener datos del doctor ──────────────────────────────────────
-    doctor = db.query(Doctor).filter(Doctor.id == credencial.doctor_id).first()
+    # ── PASO 4: Obtener los datos del doctor para el token ───────────────────
+    doctor = db.query(Doctor).filter(
+        Doctor.id == credencial.doctor_id
+    ).first()
 
     if not doctor or not doctor.activo:
         raise HTTPException(
             status_code = status.HTTP_401_UNAUTHORIZED,
-            detail      = "Doctor no encontrado o inactivo."
+            detail      = "Doctor no encontrado o inactivo.",
+            headers     = {"WWW-Authenticate": "Bearer"}
         )
 
-    if not doctor.email:
-        raise HTTPException(
-            status_code = status.HTTP_400_BAD_REQUEST,
-            detail      = "El doctor no tiene email registrado. "
-                          "Contacta al administrador para agregarlo."
-        )
+    # ── PASO 5: Crear el token JWT ───────────────────────────────────────────
+    # El payload es lo que quedará DENTRO del token (se puede leer pero no modificar)
+    # "sub" (subject) es el campo estándar del JWT para identificar al usuario
+    token_payload = {
+        "sub"          : colegiatura,          # identificador principal
+        "doctor_id"    : doctor.id,            # ID en la BD
+        "nombre"       : f"Dr. {doctor.nombres} {doctor.apellidos}",
+        "especialidad" : doctor.especialidad,
+    }
 
-    # ── PASO 4: Generar código 2FA de 6 dígitos ───────────────────────────────
-    # Generamos un número entre 100000 y 999999 (siempre 6 dígitos)
-    codigo = str(random.randint(100000, 999999))
-    expira = datetime.utcnow() + timedelta(minutes=5)
+    # Creamos el token con la función de jwt_config.py
+    token = crear_token(data=token_payload)
 
-    # ── PASO 5: Invalidar códigos anteriores del mismo doctor ─────────────────
-    # Para que no acumule códigos viejos en la tabla
-    db.query(Codigo2FA).filter(
-        Codigo2FA.doctor_id == doctor.id,
-        Codigo2FA.usado     == False
-    ).delete()
-
-    # ── PASO 6: Guardar el nuevo código en la BD ──────────────────────────────
-    nuevo_codigo = Codigo2FA(
-        doctor_id = doctor.id,
-        codigo    = codigo,
-        expira_en = expira,
-        usado     = False
-    )
-    db.add(nuevo_codigo)
-    db.commit()
-
-    # ── PASO 7: Enviar el código por email ────────────────────────────────────
-    enviado = enviar_codigo_2fa(
-        email_destino = doctor.email,
-        nombre_doctor = f"Dr. {doctor.nombres} {doctor.apellidos}",
-        codigo        = codigo
-    )
-
-    if not enviado:
-        raise HTTPException(
-            status_code = 500,
-            detail      = "No se pudo enviar el código de verificación. "
-                          "Verifica tu email o contacta al administrador."
-        )
-
-    print(f"[2FA] LOGIN_PASO1 → Dr. {doctor.nombres} {doctor.apellidos} "
-          f"| Colegiatura: {colegiatura} "
-          f"| Código enviado a: {doctor.email}")
+    # ── Registrar en consola (para auditoría en desarrollo) ───────────────────
+    print(f"[AUTH] LOGIN_EXITOSO → "
+          f"Dr. {doctor.nombres} {doctor.apellidos} | "
+          f"Colegiatura: {colegiatura} | "
+          f"ID: {doctor.id}")
 
     return LoginResponse(
-        mensaje           = "Código de verificación enviado a tu correo electrónico",
-        codigo_enviado    = True,
-        email_destino     = enmascarar_email(doctor.email),
-        doctor_id         = doctor.id,
-        expira_en_minutos = 5
+        access_token       = token,
+        token_type         = "bearer",
+        doctor_id          = doctor.id,
+        nombre             = f"Dr. {doctor.nombres} {doctor.apellidos}",
+        especialidad       = doctor.especialidad,
+        numero_colegiatura = colegiatura,
+        expira_en_minutos  = 60
     )
