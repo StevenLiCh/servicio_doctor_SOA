@@ -5,7 +5,7 @@
 #            usando Gmail SMTP con contraseña de aplicación
 # ============================================================
 
-import smtplib
+import requests
 import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -17,6 +17,7 @@ load_dotenv()
 EMAIL_REMITENTE   = os.getenv("EMAIL_REMITENTE")
 EMAIL_PASSWORD    = os.getenv("EMAIL_PASSWORD_APP")
 EMAIL_NOMBRE      = os.getenv("EMAIL_NOMBRE", "EcoSalud - Panel Doctor")
+BREVO_API_KEY     = os.getenv("BREVO_API_KEY")
 
 # ── FUNCIÓN: Enviar código 2FA por correo ─────────────────────────────────────
 def enviar_codigo_2fa(email_destino: str, nombre_doctor: str, codigo: str) -> bool:
