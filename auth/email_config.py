@@ -107,44 +107,41 @@ Si no intentaste iniciar sesión, ignora este mensaje.
         mensaje.attach(MIMEText(texto_plano, "plain", "utf-8"))
         mensaje.attach(MIMEText(html, "html", "utf-8"))
 
-        # ── Enviar por Gmail SMTP ──────────────────────────────────────────────
-        # Puerto 587 con STARTTLS es el estándar seguro de Gmail
-        import socket
+        headers = {
+            "accept": "application/json",
+            "api-key": BREVO_API_KEY,
+            "content-type": "application/json"
+        }
 
-        print("===== PRUEBA SMTP =====")
+        payload = {
+            "sender": {
+                "name": EMAIL_NOMBRE,
+                "email": EMAIL_REMITENTE
+            },
+            "to": [
+                {
+                    "email": email_destino,
+                    "name": nombre_doctor
+                }
+            ],
+            "subject": f"🔐 Tu código de verificación EcoSalud: {codigo}",
+            "htmlContent": html
+        }
 
-        try:
-            ip = socket.gethostbyname("smtp.gmail.com")
-            print(f"DNS OK: {ip}")
-        except Exception as e:
-            print(f"ERROR DNS: {e}")
-            raise
+        respuesta = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            headers=headers,
+            json=payload,
+            timeout=20
+        )
 
-        print("Intentando conectar...")
+        if respuesta.status_code not in (200, 201):
+            print(respuesta.text)
+            raise Exception(f"Brevo devolvió {respuesta.status_code}")
 
-        try:
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=20) as servidor:
-                print("Conectado al servidor SMTP")
+        print("CORREO ENVIADO CON BREVO")
 
-                #servidor.ehlo()
-                #print("EHLO OK")
 
-                #servidor.starttls()
-                #print("STARTTLS OK")
-
-                servidor.login(EMAIL_REMITENTE, EMAIL_PASSWORD)
-                print("LOGIN OK")
-
-                servidor.sendmail(
-                    EMAIL_REMITENTE,
-                    email_destino,
-                    mensaje.as_bytes()
-                )
-
-                print("CORREO ENVIADO")
-        except Exception as e:
-            print(f"ERROR SMTP: {type(e).__name__}: {e}")
-            raise
 
         print(f"[2FA] CÓDIGO_ENVIADO → {email_destino}")
         return True
