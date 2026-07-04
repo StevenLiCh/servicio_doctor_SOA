@@ -108,15 +108,42 @@ Si no intentaste iniciar sesión, ignora este mensaje.
 
         # ── Enviar por Gmail SMTP ──────────────────────────────────────────────
         # Puerto 587 con STARTTLS es el estándar seguro de Gmail
-        with smtplib.SMTP("smtp.gmail.com", 587) as servidor:
-            servidor.ehlo()
-            servidor.starttls()                              # Cifrado TLS
-            servidor.login(EMAIL_REMITENTE, EMAIL_PASSWORD) # Contraseña de aplicación
-            servidor.sendmail(
-                EMAIL_REMITENTE,
-                email_destino,
-                mensaje.as_bytes()
-            )
+        import socket
+
+        print("===== PRUEBA SMTP =====")
+
+        try:
+            ip = socket.gethostbyname("smtp.gmail.com")
+            print(f"DNS OK: {ip}")
+        except Exception as e:
+            print(f"ERROR DNS: {e}")
+            raise
+
+        print("Intentando conectar...")
+
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as servidor:
+                print("Conectado al servidor SMTP")
+
+                servidor.ehlo()
+                print("EHLO OK")
+
+                servidor.starttls()
+                print("STARTTLS OK")
+
+                servidor.login(EMAIL_REMITENTE, EMAIL_PASSWORD)
+                print("LOGIN OK")
+
+                servidor.sendmail(
+                    EMAIL_REMITENTE,
+                    email_destino,
+                    mensaje.as_bytes()
+                )
+
+                print("CORREO ENVIADO")
+        except Exception as e:
+            print(f"ERROR SMTP: {type(e).__name__}: {e}")
+            raise
 
         print(f"[2FA] CÓDIGO_ENVIADO → {email_destino}")
         return True
