@@ -149,6 +149,13 @@
     width:100%;
   }
   .btn-primary:hover{ background:var(--primary-dark); }
+  /* Botón primario en línea (dentro de flex, no ocupa todo el ancho) */
+  .btn-primary.btn-inline{
+    width:auto;
+    flex-shrink:0;
+    padding:10px 20px;
+    white-space:nowrap;
+  }
 
   .btn-secundario{
     background:transparent;
@@ -744,9 +751,11 @@
       <div class="card">
         <label>Buscar paciente por DNI</label>
         <div style="display:flex; gap:10px; align-items:center; margin-bottom:0;">
-          <input type="text" id="consulta-dni" placeholder="Ej: 12345678" style="flex:1; margin-bottom:0;"
+          <input type="text" id="consulta-dni" placeholder="Ej: 12345678"
+            style="flex:1; margin-bottom:0; min-width:0;"
             onkeydown="if(event.key==='Enter') buscarPacienteConsulta()" />
-          <button type="button" class="btn-primary" style="flex-shrink:0;" onclick="buscarPacienteConsulta()">Buscar</button>
+          <button type="button" class="btn-primary btn-inline"
+            onclick="buscarPacienteConsulta()">Buscar</button>
         </div>
       </div>
 
@@ -775,9 +784,11 @@
       <div class="card">
         <label>Buscar paciente por DNI</label>
         <div style="display:flex; gap:10px; align-items:center; margin-bottom:0;">
-          <input type="text" id="recetas-pac-dni" placeholder="Ej: 12345678" style="flex:1; margin-bottom:0;"
+          <input type="text" id="recetas-pac-dni" placeholder="Ej: 12345678"
+            style="flex:1; margin-bottom:0; min-width:0;"
             onkeydown="if(event.key==='Enter') buscarRecetasPaciente()" />
-          <button type="button" class="btn-primary" style="flex-shrink:0;" onclick="buscarRecetasPaciente()">Buscar</button>
+          <button type="button" class="btn-primary btn-inline"
+            onclick="buscarRecetasPaciente()">Buscar</button>
         </div>
       </div>
 
