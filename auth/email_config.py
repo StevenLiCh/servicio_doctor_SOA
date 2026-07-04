@@ -122,14 +122,14 @@ Si no intentaste iniciar sesión, ignora este mensaje.
         print("Intentando conectar...")
 
         try:
-            with smtplib.SMTP("smtp.gmail.com", 587, timeout=20) as servidor:
+            with smtplib.SMTP("smtp.gmail.com", 465, timeout=20) as servidor:
                 print("Conectado al servidor SMTP")
 
-                servidor.ehlo()
-                print("EHLO OK")
+                #servidor.ehlo()
+                #print("EHLO OK")
 
-                servidor.starttls()
-                print("STARTTLS OK")
+                #servidor.starttls()
+                #print("STARTTLS OK")
 
                 servidor.login(EMAIL_REMITENTE, EMAIL_PASSWORD)
                 print("LOGIN OK")
