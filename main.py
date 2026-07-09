@@ -1,11 +1,6 @@
 # ============================================================
 # main.py - SERVICIO DOCTORES
 # Ubicación: EcoSistemaSalud/ServicioDoctores/main.py
-# Solo arranca el servidor y registra los endpoints
-# Cada endpoint vive en su propio archivo en Endpoints/
-# Ejecutar: python main.py
-# Documentación: http://localhost:8001/docs
-# Panel visual: http://localhost:8001/panel
 # ============================================================
 
 import sys
@@ -15,10 +10,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
-# Agregar EcoSistemaSalud al path para importar database.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# ── Endpoints existentes (NO SE MODIFICARON) ──────────────────────────────────
+# ── Endpoints clínicos ────────────────────────────────────────────────────────
 from Endpoints.post_doctor_diagnostico  import router as router_diagnostico
 from Endpoints.post_doctor_orden_medica import router as router_orden
 from Endpoints.post_doctor_receta       import router as router_receta
@@ -28,39 +22,41 @@ from Endpoints.get_recetas_paciente     import router as router_recetas
 from Endpoints.get_doctores             import router as router_doctores
 from Endpoints.get_recetas_por_paciente import router as router_recetas_paciente_publico
 
-# ── NUEVO: Endpoints de autenticación (login) ─────────────────────────────────
-# post_auth_registro → POST /auth/registro  (admin asigna contraseña a un doctor)
-# post_auth_login    → POST /auth/login     (doctor inicia sesión y recibe JWT)
-from Endpoints.post_auth_registro import router as router_registro
-from Endpoints.post_auth_login    import router as router_login
-from Endpoints.post_auth_verificar import router as router_verificar
+# ── Autenticación ─────────────────────────────────────────────────────────────
+from Endpoints.post_auth_registro    import router as router_registro
+from Endpoints.post_auth_login       import router as router_login
+from Endpoints.post_auth_verificar   import router as router_verificar
+from Endpoints.post_auth_2fa_externo import router as router_2fa_externo  # NUEVO
 
 # ── Inicializar FastAPI ───────────────────────────────────────────────────────
 app = FastAPI(
     title       = "ServicioDoctores - EcoSistemaSalud",
     description = """
     Microservicio de Doctores del Ecosistema de Salud Conectado.
-    Cada endpoint es independiente y puede consumirse por separado.
 
-    ## Autenticación
-    - **POST /auth/registro** → Asignar credenciales a un doctor existente
-    - **POST /auth/login**    → El doctor inicia sesión y recibe un token JWT
+    ## Autenticación Doctor (2FA)
+    - **POST /auth/registro**         → Asignar credenciales a un doctor
+    - **POST /auth/login**            → PASO 1: verifica credenciales, envía código 2FA
+    - **POST /auth/verificar**        → PASO 2: valida código, entrega JWT
+
+    ## 2FA Portal Unificado (paciente/clínica)
+    - **POST /auth/2fa/{perfil}/enviar**    → Envía código 2FA a email externo
+    - **POST /auth/2fa/{perfil}/verificar** → Verifica código y devuelve token
 
     ## Endpoints del Doctor
-    - **POST /doctor/diagnostico**
-    - **POST /doctor/orden-medica**
-    - **POST /doctor/receta**
-    - **GET  /doctor/{id}/pacientes-atendidos**
-    - **GET  /doctor/consulta-paciente**
-    - **GET  /doctor/recetas-paciente**
-    - **GET  /doctor/doctores**
+    - POST /doctor/diagnostico
+    - POST /doctor/orden-medica
+    - POST /doctor/receta
+    - GET  /doctor/{id}/pacientes-atendidos
+    - GET  /doctor/consulta-paciente
+    - GET  /doctor/recetas-paciente
+    - GET  /doctores
+    - GET  /pacientes/{id}/recetas
     """,
-    version     = "1.1.0"  # subimos versión porque agregamos autenticación
+    version = "1.2.0"
 )
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
-# allow_origins=["*"] permite cualquier origen (útil en desarrollo)
-# En producción cambiar "*" por la URL real del frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -68,58 +64,67 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Registrar endpoints existentes (NO SE TOCARON) ────────────────────────────
-app.include_router(router_diagnostico)  # POST /doctor/diagnostico
-app.include_router(router_orden)        # POST /doctor/orden-medica
-app.include_router(router_receta)       # POST /doctor/receta
-app.include_router(router_pacientes)    # GET  /doctor/{id}/pacientes-atendidos
-app.include_router(router_consulta)     # GET  /doctor/consulta-paciente
-app.include_router(router_recetas)      # GET  /doctor/recetas-paciente
-app.include_router(router_doctores)     # GET /doctores
-app.include_router(router_recetas_paciente_publico)  # GET /pacientes/{paciente_id}/recetas
+# ── Registrar routers ─────────────────────────────────────────────────────────
+app.include_router(router_diagnostico)
+app.include_router(router_orden)
+app.include_router(router_receta)
+app.include_router(router_pacientes)
+app.include_router(router_consulta)
+app.include_router(router_recetas)
+app.include_router(router_doctores)
+app.include_router(router_recetas_paciente_publico)
 
-# ── NUEVO: Registrar endpoints de autenticación ───────────────────────────────
-app.include_router(router_registro)     # POST /auth/registro
-app.include_router(router_login)        # POST /auth/login
-app.include_router(router_verificar)     # POST /auth/verificar
+app.include_router(router_registro)
+app.include_router(router_login)
+app.include_router(router_verificar)
+app.include_router(router_2fa_externo)   # POST /auth/2fa/{perfil}/enviar y verificar
 
 # ── Health Check ──────────────────────────────────────────────────────────────
 @app.get("/", tags=["ServicioDoctores"])
 def raiz():
-    """Verifica que el servicio está activo y lista todos los endpoints"""
     return {
         "servicio" : "ServicioDoctores - EcoSistemaSalud",
         "estado"   : "activo",
-        "version"  : "1.1.0",
+        "version"  : "1.2.0",
         "endpoints": [
-            # Autenticación (nuevos)
             "POST /auth/registro",
             "POST /auth/login",
-            # Endpoints del doctor (existentes)
+            "POST /auth/verificar",
+            "POST /auth/2fa/{perfil}/enviar",
+            "POST /auth/2fa/{perfil}/verificar",
             "POST /doctor/diagnostico",
             "POST /doctor/orden-medica",
             "POST /doctor/receta",
             "GET  /doctor/{id}/pacientes-atendidos",
             "GET  /doctor/consulta-paciente",
-            "GET  /doctor/recetas-paciente"
+            "GET  /doctor/recetas-paciente",
+            "GET  /doctores",
+            "GET  /pacientes/{id}/recetas"
         ]
     }
 
-# ── Panel visual del doctor ───────────────────────────────────────────────────
+# ── Portales HTML ─────────────────────────────────────────────────────────────
 @app.get("/panel", tags=["Panel"], include_in_schema=False)
 def panel_doctor():
-    """Sirve el panel visual HTML del doctor"""
-    panel_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "panel_doctor.html")
-    return FileResponse(panel_path)
+    """Panel del doctor"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "panel_doctor.html")
+    return FileResponse(path)
+
+@app.get("/login", tags=["Portal"], include_in_schema=False)
+def portal_login():
+    """Portal unificado de login para los 3 perfiles"""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "login_ecosalud.html")
+    return FileResponse(path)
 
 # ── Punto de entrada ──────────────────────────────────────────────────────────
 if __name__ == "__main__":
     try:
         print("=" * 55)
-        print("[*] ServicioDoctores - EcoSistemaSalud v1.1.0")
-        print("[*] Puerto : 8001")
-        print("[*] Docs   : http://localhost:8001/docs")
-        print("[*] Panel  : http://localhost:8001/panel")
+        print("[*] ServicioDoctores - EcoSistemaSalud v1.2.0")
+        print("[*] Puerto  : 8001")
+        print("[*] Docs    : http://localhost:8001/docs")
+        print("[*] Panel   : http://localhost:8001/panel")
+        print("[*] Login   : http://localhost:8001/login")
         print("=" * 55)
         uvicorn.run(
             "main:app",
