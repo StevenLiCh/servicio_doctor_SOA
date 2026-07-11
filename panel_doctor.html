@@ -1062,9 +1062,8 @@ async function apiFetch(ruta, opciones = {}){
    CAMBIO DE VISTA: LOGIN / 2FA / PANEL
    ============================================================ */
 function mostrarLogin(){
-  document.getElementById("vista-login").style.display      = "flex";
-  document.getElementById("vista-2fa").style.display        = "none";
-  document.getElementById("vista-panel").classList.remove("activo");
+  // El panel ya no tiene login propio — redirigir al portal unificado
+  window.location.href = "/login";
 }
 
 function mostrar2FA(emailDestino){
@@ -2034,10 +2033,39 @@ function inicializarBuscadoresDNI(){
 llenarSelectsCIE10();
 inicializarBuscadoresDNI();
 
+// NUEVO: Si el panel fue abierto desde el portal unificado (/login),
+// los datos de sesión llegan en sessionStorage (no en localStorage).
+// Los migramos a localStorage para que el panel funcione normalmente.
+(function migrarSesionPortal(){
+  const tokenPortal  = sessionStorage.getItem("ecosalud_token_doctor");
+  const doctorPortal = sessionStorage.getItem("ecosalud_doctor");
+
+  if (tokenPortal && doctorPortal){
+    try{
+      const doctor = JSON.parse(doctorPortal);
+      // Guardar en localStorage con el mismo formato que usa el panel
+      localStorage.setItem("ecosalud_token", tokenPortal);
+      localStorage.setItem("ecosalud_doctor", JSON.stringify({
+        doctor_id:          doctor.doctor_id,
+        nombre:             doctor.nombre,
+        especialidad:       doctor.especialidad,
+        numero_colegiatura: doctor.numero_colegiatura
+      }));
+      // Limpiar sessionStorage (ya no lo necesitamos)
+      sessionStorage.removeItem("ecosalud_token_doctor");
+      sessionStorage.removeItem("ecosalud_doctor");
+    }catch(e){
+      console.warn("[Panel] No se pudo migrar sesión del portal:", e);
+    }
+  }
+})();
+
 if (obtenerToken() && obtenerDoctor()){
   mostrarPanel();
 }else{
-  mostrarLogin();
+  // Si no hay sesión → redirigir al portal unificado en vez de mostrar
+  // el login interno del panel (el portal es ahora la entrada oficial)
+  window.location.href = "/login";
 }
 </script>
 

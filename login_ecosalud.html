@@ -7,98 +7,40 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   TOKENS DE DISEÑO
-   ============================================================ */
 :root{
-  --bg:          #F7F9FC;
-  --surface:     #FFFFFF;
-  --ink:         #0A1628;
-  --ink-soft:    #5A6A7A;
-  --primary:     #0E7C6E;
-  --primary-dark:#0A5C52;
-  --primary-soft:#E8F4F1;
-  --gold:        #C9A84C;
-  --gold-soft:   #FDF6E3;
-  --danger:      #DC2626;
-  --danger-soft: #FEF2F2;
-  --border:      #E2EAF0;
-  --radius:      14px;
-  --font-display:'Sora', sans-serif;
-  --font-body:   'Inter', sans-serif;
-  --shadow:      0 8px 32px -8px rgba(10,22,40,.14);
+  --bg:#F7F9FC; --surface:#FFFFFF; --ink:#0A1628; --ink-soft:#5A6A7A;
+  --primary:#0E7C6E; --primary-dark:#0A5C52; --primary-soft:#E8F4F1;
+  --gold:#C9A84C; --danger:#DC2626; --danger-soft:#FEF2F2;
+  --border:#E2EAF0; --radius:14px;
+  --font-display:'Sora',sans-serif; --font-body:'Inter',sans-serif;
+  --shadow:0 8px 32px -8px rgba(10,22,40,.14);
 }
-
 *{ box-sizing:border-box; margin:0; padding:0; }
 html,body{ min-height:100vh; font-family:var(--font-body); background:var(--bg); color:var(--ink); }
 
-/* ============================================================
-   LAYOUT PRINCIPAL
-   ============================================================ */
-.portal{
-  min-height:100vh;
-  display:flex;
-  flex-direction:column;
-}
+/* ── Layout ── */
+.portal{ min-height:100vh; display:flex; flex-direction:column; }
 
-/* ── Header ── */
 .header{
-  background:var(--ink);
-  padding:0 40px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  height:64px;
-  position:relative;
-  overflow:hidden;
+  background:var(--ink); padding:0 40px;
+  display:flex; align-items:center; height:64px;
+  position:relative; overflow:hidden;
 }
-.header-brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  z-index:1;
-}
-.header-brand .logo-dot{
-  width:10px; height:10px; border-radius:50%;
-  background:var(--primary);
-}
-.header-brand h1{
-  font-family:var(--font-display);
-  font-size:20px;
-  font-weight:700;
-  color:#fff;
-  letter-spacing:-.02em;
-}
-.header-brand span{
-  font-size:12px;
-  color:rgba(255,255,255,.5);
-  font-weight:400;
-}
+.header-brand{ display:flex; align-items:center; gap:12px; z-index:1; }
+.logo-dot{ width:10px; height:10px; border-radius:50%; background:var(--primary); }
+.header-brand h1{ font-family:var(--font-display); font-size:20px; font-weight:700; color:#fff; }
+.header-brand span{ font-size:12px; color:rgba(255,255,255,.5); font-weight:400; }
 
-/* Línea ECG animada en el header */
-.ecg-line{
-  position:absolute;
-  left:0; right:0; bottom:0;
-  height:28px;
-  opacity:.25;
-}
+.ecg-line{ position:absolute; left:0; right:0; bottom:0; height:28px; opacity:.25; }
 .ecg-line path{
-  fill:none;
-  stroke:var(--primary);
-  stroke-width:1.5;
-  stroke-dasharray:600;
-  stroke-dashoffset:600;
+  fill:none; stroke:var(--primary); stroke-width:1.5;
+  stroke-dasharray:900; stroke-dashoffset:900;
   animation:ecg 3s ease-in-out forwards;
 }
-@keyframes ecg{
-  0%  { stroke-dashoffset:600; }
-  100%{ stroke-dashoffset:0; }
-}
-@media(prefers-reduced-motion:reduce){
-  .ecg-line path{ animation:none; stroke-dashoffset:0; }
-}
+@keyframes ecg{ 0%{stroke-dashoffset:900;} 100%{stroke-dashoffset:0;} }
+@media(prefers-reduced-motion:reduce){ .ecg-line path{ animation:none; stroke-dashoffset:0; } }
 
-/* ── Contenido central ── */
+/* ── Contenido ── */
 .contenido{
   flex:1;
   display:flex;
@@ -108,229 +50,107 @@ html,body{ min-height:100vh; font-family:var(--font-body); background:var(--bg);
   padding:48px 24px;
 }
 
+/* ── PASO PERFIL ── */
+#paso-perfil{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  width:100%;
+}
 .titulo-portal{
-  font-family:var(--font-display);
-  font-size:30px;
-  font-weight:800;
-  letter-spacing:-.02em;
-  margin-bottom:8px;
-  text-align:center;
+  font-family:var(--font-display); font-size:30px; font-weight:800;
+  letter-spacing:-.02em; margin-bottom:8px; text-align:center;
 }
 .subtitulo-portal{
-  font-size:15px;
-  color:var(--ink-soft);
-  margin-bottom:40px;
-  text-align:center;
+  font-size:15px; color:var(--ink-soft); margin-bottom:40px; text-align:center;
 }
-
-/* ── Selección de perfil ── */
 .perfiles{
-  display:flex;
-  gap:20px;
-  margin-bottom:40px;
-  flex-wrap:wrap;
-  justify-content:center;
+  display:flex; gap:20px; flex-wrap:wrap; justify-content:center;
 }
-
 .perfil-card{
-  background:var(--surface);
-  border:2px solid var(--border);
-  border-radius:var(--radius);
-  padding:28px 24px;
-  width:180px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .2s ease;
-  position:relative;
-  overflow:hidden;
+  background:var(--surface); border:2px solid var(--border);
+  border-radius:var(--radius); padding:28px 24px; width:180px;
+  text-align:center; cursor:pointer; transition:all .2s ease;
+  position:relative; overflow:hidden;
 }
 .perfil-card::before{
-  content:'';
-  position:absolute;
-  inset:0;
-  background:var(--primary-soft);
-  opacity:0;
-  transition:opacity .2s;
+  content:''; position:absolute; inset:0;
+  background:var(--primary-soft); opacity:0; transition:opacity .2s;
 }
-.perfil-card:hover{
-  border-color:var(--primary);
-  transform:translateY(-3px);
-  box-shadow:var(--shadow);
-}
+.perfil-card:hover{ border-color:var(--primary); transform:translateY(-3px); box-shadow:var(--shadow); }
 .perfil-card:hover::before{ opacity:1; }
-.perfil-card.activo{
-  border-color:var(--primary);
-  background:var(--primary-soft);
-  box-shadow:0 0 0 4px rgba(14,124,110,.12);
-}
-
-.perfil-icono{
-  width:56px; height:56px;
-  margin:0 auto 14px;
-  position:relative;
-  z-index:1;
-}
+.perfil-card.activo{ border-color:var(--primary); background:var(--primary-soft); box-shadow:0 0 0 4px rgba(14,124,110,.12); }
+.perfil-icono{ width:56px; height:56px; margin:0 auto 14px; position:relative; z-index:1; }
 .perfil-icono svg{ width:100%; height:100%; }
+.perfil-nombre{ font-family:var(--font-display); font-size:15px; font-weight:700; margin-bottom:4px; position:relative; z-index:1; }
+.perfil-desc{ font-size:12px; color:var(--ink-soft); position:relative; z-index:1; }
 
-.perfil-nombre{
-  font-family:var(--font-display);
-  font-size:15px;
-  font-weight:700;
-  margin-bottom:4px;
-  position:relative;
-  z-index:1;
-}
-.perfil-desc{
-  font-size:12px;
-  color:var(--ink-soft);
-  position:relative;
-  z-index:1;
-}
-
-/* ── Card de login ── */
+/* ── Login card ── */
 .login-card{
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:36px 40px;
-  width:100%;
-  max-width:420px;
-  box-shadow:var(--shadow);
-  display:none;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:36px 40px;
+  width:100%; max-width:420px; box-shadow:var(--shadow);
   animation:slideUp .3s ease forwards;
 }
-.login-card.visible{ display:block; }
+@keyframes slideUp{ from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
 
-@keyframes slideUp{
-  from{ opacity:0; transform:translateY(16px); }
-  to  { opacity:1; transform:translateY(0); }
+.perfil-badge{
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--primary-soft); border-radius:99px; padding:6px 14px;
+  margin-bottom:20px; font-size:13px; font-weight:600; color:var(--primary-dark);
 }
+.login-card h2{ font-family:var(--font-display); font-size:22px; font-weight:700; margin-bottom:6px; }
+.login-card > p{ font-size:14px; color:var(--ink-soft); margin-bottom:24px; }
 
-.login-perfil-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  background:var(--primary-soft);
-  border-radius:99px;
-  padding:6px 14px;
-  margin-bottom:20px;
-  font-size:13px;
-  font-weight:600;
-  color:var(--primary-dark);
-}
-.login-perfil-badge svg{ width:16px; height:16px; }
-
-.login-card h2{
-  font-family:var(--font-display);
-  font-size:22px;
-  font-weight:700;
-  margin-bottom:6px;
-}
-.login-card p{
-  font-size:14px;
-  color:var(--ink-soft);
-  margin-bottom:24px;
-}
-
-label{
-  display:block;
-  font-size:13px;
-  font-weight:500;
-  margin-bottom:6px;
-  color:var(--ink);
-}
+label{ display:block; font-size:13px; font-weight:500; margin-bottom:6px; color:var(--ink); }
 input{
-  width:100%;
-  font-family:var(--font-body);
-  font-size:14px;
-  padding:11px 14px;
-  border:1.5px solid var(--border);
-  border-radius:10px;
-  background:#FAFBFC;
-  color:var(--ink);
-  margin-bottom:16px;
+  width:100%; font-family:var(--font-body); font-size:14px;
+  padding:11px 14px; border:1.5px solid var(--border); border-radius:10px;
+  background:#FAFBFC; color:var(--ink); margin-bottom:16px;
   transition:border-color .15s, box-shadow .15s;
 }
-input:focus{
-  outline:none;
-  border-color:var(--primary);
-  box-shadow:0 0 0 3px rgba(14,124,110,.12);
-}
+input:focus{ outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(14,124,110,.12); }
 
 .btn-acceso{
-  width:100%;
-  background:var(--primary);
-  color:#fff;
-  border:none;
-  border-radius:10px;
-  padding:13px;
-  font-family:var(--font-display);
-  font-size:15px;
-  font-weight:700;
-  cursor:pointer;
-  transition:background .15s, transform .05s;
-  margin-top:4px;
+  width:100%; background:var(--primary); color:#fff; border:none;
+  border-radius:10px; padding:13px; font-family:var(--font-display);
+  font-size:15px; font-weight:700; cursor:pointer;
+  transition:background .15s, transform .05s; margin-top:4px;
 }
 .btn-acceso:hover{ background:var(--primary-dark); }
 .btn-acceso:active{ transform:translateY(1px); }
 .btn-acceso:disabled{ opacity:.6; cursor:not-allowed; }
-
 .btn-volver{
-  width:100%;
-  background:transparent;
-  border:1.5px solid var(--border);
-  border-radius:10px;
-  padding:10px;
-  font-family:var(--font-body);
-  font-size:13px;
-  font-weight:600;
-  color:var(--ink-soft);
-  cursor:pointer;
-  margin-top:10px;
-  transition:border-color .15s, color .15s;
+  width:100%; background:transparent; border:1.5px solid var(--border);
+  border-radius:10px; padding:10px; font-family:var(--font-body);
+  font-size:13px; font-weight:600; color:var(--ink-soft);
+  cursor:pointer; margin-top:10px; transition:border-color .15s, color .15s;
 }
 .btn-volver:hover{ border-color:var(--primary); color:var(--primary); }
 
-/* ── Mensaje de error ── */
 .msg-error{
-  background:var(--danger-soft);
-  border:1px solid rgba(220,38,38,.2);
-  color:var(--danger);
-  border-radius:10px;
-  padding:11px 14px;
-  font-size:13px;
-  margin-bottom:16px;
-  display:none;
+  background:var(--danger-soft); border:1px solid rgba(220,38,38,.2);
+  color:var(--danger); border-radius:10px; padding:11px 14px;
+  font-size:13px; margin-bottom:16px; display:none;
 }
 .msg-error.visible{ display:block; }
 
-/* ── Paso 2FA ── */
 .info-2fa{
-  background:var(--primary-soft);
-  border-radius:10px;
-  padding:14px 16px;
-  margin-bottom:18px;
-  font-size:13px;
-  color:var(--primary-dark);
-  line-height:1.5;
+  background:var(--primary-soft); border-radius:10px;
+  padding:14px 16px; margin-bottom:18px;
+  font-size:13px; color:var(--primary-dark); line-height:1.6;
 }
-.info-2fa strong{ display:block; font-size:14px; margin-bottom:2px; }
+.info-2fa strong{ display:block; font-size:14px; margin-bottom:4px; }
 
-input.input-codigo{
-  font-size:30px;
-  letter-spacing:12px;
-  text-align:center;
-  font-family:'Sora', monospace;
-  padding:14px;
+.input-codigo{
+  font-size:30px !important; letter-spacing:12px !important;
+  text-align:center !important; font-family:'Sora',monospace !important;
+  padding:14px !important;
 }
 
-/* ── Footer ── */
 .footer{
-  text-align:center;
-  padding:20px;
-  font-size:12px;
-  color:var(--ink-soft);
-  border-top:1px solid var(--border);
+  text-align:center; padding:20px; font-size:12px;
+  color:var(--ink-soft); border-top:1px solid var(--border);
 }
 
 @media(max-width:600px){
@@ -343,7 +163,6 @@ input.input-codigo{
 </style>
 </head>
 <body>
-
 <div class="portal">
 
   <!-- ── Header ── -->
@@ -363,17 +182,17 @@ input.input-codigo{
   <!-- ── Contenido ── -->
   <main class="contenido">
 
-    <!-- PASO 1: Selección de perfil -->
+    <!-- ════════════════════════════════════════
+         PASO 1: Selección de perfil
+         ════════════════════════════════════════ -->
     <div id="paso-perfil">
       <h2 class="titulo-portal">Bienvenido a EcoSalud</h2>
       <p class="subtitulo-portal">Selecciona tu perfil para iniciar sesión</p>
-
       <div class="perfiles">
 
-        <!-- Doctor -->
         <div class="perfil-card" onclick="seleccionarPerfil('doctor')" id="card-doctor">
           <div class="perfil-icono">
-            <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 56 56" fill="none">
               <circle cx="28" cy="28" r="28" fill="#E8F4F1"/>
               <circle cx="28" cy="22" r="7" stroke="#0E7C6E" stroke-width="2.2" fill="none"/>
               <path d="M14 42c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#0E7C6E" stroke-width="2.2" stroke-linecap="round" fill="none"/>
@@ -384,25 +203,22 @@ input.input-codigo{
           <div class="perfil-desc">Accede a tu panel médico</div>
         </div>
 
-        <!-- Paciente -->
         <div class="perfil-card" onclick="seleccionarPerfil('paciente')" id="card-paciente">
           <div class="perfil-icono">
-            <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 56 56" fill="none">
               <circle cx="28" cy="28" r="28" fill="#E8F4F1"/>
               <circle cx="28" cy="22" r="7" stroke="#0E7C6E" stroke-width="2.2" fill="none"/>
               <path d="M14 42c0-7.732 6.268-14 14-14s14 6.268 14 14" stroke="#0E7C6E" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-              <path d="M21 34h14" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
-              <path d="M28 31v6" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
+              <path d="M21 34h14M28 31v6" stroke="#C9A84C" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
           <div class="perfil-nombre">Paciente</div>
           <div class="perfil-desc">Consulta tu historial de salud</div>
         </div>
 
-        <!-- Clínica -->
         <div class="perfil-card" onclick="seleccionarPerfil('clinica')" id="card-clinica">
           <div class="perfil-icono">
-            <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 56 56" fill="none">
               <circle cx="28" cy="28" r="28" fill="#E8F4F1"/>
               <rect x="16" y="20" width="24" height="20" rx="2" stroke="#0E7C6E" stroke-width="2.2" fill="none"/>
               <path d="M22 20v-4a6 6 0 0 1 12 0v4" stroke="#0E7C6E" stroke-width="2.2" stroke-linecap="round" fill="none"/>
@@ -416,65 +232,104 @@ input.input-codigo{
       </div>
     </div>
 
-    <!-- PASO 2: Formulario de login -->
-    <div class="login-card" id="paso-login">
-
-      <div class="login-perfil-badge" id="badge-perfil">
-        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <!-- ════════════════════════════════════════
+         PASO 2: Formulario de credenciales
+         ════════════════════════════════════════ -->
+    <div class="login-card" id="paso-login" style="display:none;">
+      <div class="perfil-badge" id="badge-perfil">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="6" r="3" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
         <span id="badge-texto">Doctor</span>
       </div>
-
-      <h2 id="login-titulo">Iniciar sesión</h2>
-      <p id="login-desc">Ingresa tus credenciales para continuar</p>
-
+      <h2>Iniciar sesión</h2>
+      <p>Ingresa tus credenciales para continuar</p>
       <div class="msg-error" id="login-error"></div>
-
-      <form id="form-login" onsubmit="return false;">
-        <div id="campos-login">
-          <!-- Los campos se generan dinámicamente según el perfil -->
-        </div>
-        <button type="button" class="btn-acceso" id="btn-acceso" onclick="hacerLogin()">
-          Continuar
-        </button>
-        <button type="button" class="btn-volver" onclick="volverAlPerfil()">
-          ← Cambiar perfil
-        </button>
-      </form>
+      <div id="campos-login"></div>
+      <button type="button" class="btn-acceso" id="btn-login" onclick="hacerLogin()">Continuar</button>
+      <button type="button" class="btn-volver" onclick="volverAlPerfil()">← Cambiar perfil</button>
     </div>
 
-    <!-- PASO 3: Verificación 2FA -->
-    <div class="login-card" id="paso-2fa">
-
-      <div class="login-perfil-badge" id="badge-perfil-2fa">
-        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5C11.5 14.5 14 11.5 14 8V4L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
-        <span id="badge-texto-2fa">Verificación</span>
+    <!-- ════════════════════════════════════════
+         PASO 3A: 2FA Doctor (código por email)
+         ════════════════════════════════════════ -->
+    <div class="login-card" id="paso-2fa-doctor" style="display:none;">
+      <div class="perfil-badge">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5C11.5 14.5 14 11.5 14 8V4L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span>Doctor · Verificación</span>
       </div>
-
-      <h2>Verificación de identidad</h2>
-      <p>Ingresa el código que enviamos a tu correo</p>
-
-      <div class="info-2fa" id="info-2fa">
-        <strong>📧 Código enviado</strong>
+      <h2>Verifica tu identidad</h2>
+      <p>Ingresa el código que enviamos a tu correo electrónico</p>
+      <div class="info-2fa" id="info-2fa-doctor">
+        <strong>📧 Código enviado al correo</strong>
         Revisa tu bandeja de entrada. Válido por <strong>5 minutos</strong>.
       </div>
+      <div class="msg-error" id="error-2fa-doctor"></div>
+      <label>Código de 6 dígitos</label>
+      <input type="text" id="codigo-doctor" class="input-codigo" placeholder="000000"
+        maxlength="6" autocomplete="one-time-code"
+        oninput="this.value=this.value.replace(/\D/g,'')"
+        onkeydown="if(event.key==='Enter') verificarDoctor()" />
+      <button type="button" class="btn-acceso" onclick="verificarDoctor()">Verificar y entrar</button>
+      <button type="button" class="btn-volver" onclick="mostrarLogin()">← Volver al login</button>
+    </div>
 
-      <div class="msg-error" id="2fa-error"></div>
+    <!-- ════════════════════════════════════════
+         PASO 3B: 2FA Paciente (código por email
+                  que envía ServicioPaciente)
+         ════════════════════════════════════════ -->
+    <div class="login-card" id="paso-2fa-paciente" style="display:none;">
+      <div class="perfil-badge">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5C11.5 14.5 14 11.5 14 8V4L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span>Paciente · Verificación</span>
+      </div>
+      <h2>Verifica tu identidad</h2>
+      <p>Ingresa el código que recibiste en tu correo electrónico</p>
+      <div class="info-2fa" id="info-2fa-paciente">
+        <strong>📧 Código enviado</strong>
+        El ServicioPaciente envió un código a tu correo. Válido por <strong>5 minutos</strong>.
+      </div>
+      <div class="msg-error" id="error-2fa-paciente"></div>
+      <label>Código de verificación</label>
+      <input type="text" id="codigo-paciente" class="input-codigo" placeholder="000000"
+        maxlength="6" autocomplete="one-time-code"
+        oninput="this.value=this.value.replace(/\D/g,'')"
+        onkeydown="if(event.key==='Enter') verificarPaciente()" />
+      <button type="button" class="btn-acceso" onclick="verificarPaciente()">Verificar y entrar</button>
+      <button type="button" class="btn-volver" onclick="mostrarLogin()">← Volver al login</button>
+    </div>
 
-      <form id="form-2fa" onsubmit="return false;">
-        <label>Código de 6 dígitos</label>
-        <input type="text" id="codigo-2fa" class="input-codigo"
-          placeholder="000000" maxlength="6"
-          autocomplete="one-time-code"
-          oninput="this.value=this.value.replace(/\D/g,'')"
-          onkeydown="if(event.key==='Enter') verificarCodigo()" />
-
-        <button type="button" class="btn-acceso" onclick="verificarCodigo()">
-          Verificar y entrar
-        </button>
-        <button type="button" class="btn-volver" onclick="volverAlLogin()">
-          ← Volver al login
-        </button>
-      </form>
+    <!-- ════════════════════════════════════════
+         PASO 3C: 2FA Clínica (Google Authenticator)
+         ════════════════════════════════════════ -->
+    <div class="login-card" id="paso-2fa-clinica" style="display:none;">
+      <div class="perfil-badge">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 1L2 4v4c0 3.5 2.5 6.5 6 7.5C11.5 14.5 14 11.5 14 8V4L8 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        <span>Clínica · Verificación</span>
+      </div>
+      <h2>Autenticador de dos factores</h2>
+      <p>Ingresa el código de tu aplicación de autenticación</p>
+      <div class="info-2fa">
+        <strong>📱 Google Authenticator / Authy</strong>
+        Abre tu aplicación de autenticación y usa el código de 6 dígitos
+        que aparece para <strong>EcoSalud Clínica</strong>.
+        El código cambia cada 30 segundos.
+      </div>
+      <div class="msg-error" id="error-2fa-clinica"></div>
+      <label>Código TOTP (6 dígitos)</label>
+      <input type="text" id="codigo-clinica" class="input-codigo" placeholder="000000"
+        maxlength="6" autocomplete="one-time-code"
+        oninput="this.value=this.value.replace(/\D/g,'')"
+        onkeydown="if(event.key==='Enter') verificarClinica()" />
+      <button type="button" class="btn-acceso" onclick="verificarClinica()">Verificar y entrar</button>
+      <button type="button" class="btn-volver" onclick="mostrarLogin()">← Volver al login</button>
     </div>
 
   </main>
@@ -482,322 +337,287 @@ input.input-codigo{
   <footer class="footer">
     EcoSalud · Ecosistema de Salud Conectado · Universidad Tecnológica del Perú · 2026
   </footer>
-
 </div>
 
 <script>
 /* ============================================================
-   CONFIGURACIÓN DE URLs DE CADA SERVICIO
+   CONFIGURACIÓN DE SERVICIOS
    ============================================================ */
-const SERVICIOS = {
-  doctor: {
-    nombre:      "Doctor",
-    descripcion: "Panel médico profesional",
-    // URL del login de ServicioDoctor (este mismo servicio)
-    // NOTA: Si se sirve desde el mismo dominio, dejar vacío
-    urlBase:     "",
-    endpointLogin:    "/auth/login",
-    endpointVerificar:"/auth/verificar",
-    // URL del panel al que redirige después del login
-    urlPanel:    "/panel",
-    // Campos del formulario de login
-    campos: [
-      { id: "colegiatura", label: "Número de colegiatura", placeholder: "CMP-001", type: "text", key: "numero_colegiatura" },
-      { id: "password",    label: "Contraseña",            placeholder: "••••••••",  type: "password", key: "password" }
-    ],
-    // Cómo construir el body del login desde los campos
-    buildBody: (campos) => ({
-      numero_colegiatura: campos.colegiatura,
-      password:           campos.password
-    }),
-    // ¿El login ya maneja 2FA internamente (devuelve codigo_enviado)?
-    // true  = el backend ya envía el código (caso Doctor)
-    // false = el portal maneja el 2FA externamente
-    backend2fa: true
-  },
-
-  paciente: {
-    nombre:      "Paciente",
-    descripcion: "Portal de salud personal",
-    // ── AJUSTAR: URL base del ServicioPaciente ──
-    urlBase:     "https://backend-ecosalud.onrender.com",
-    endpointLogin:    "/paciente/login",
-    // ── AJUSTAR: endpoint de verificación 2FA de paciente ──
-    // Por ahora apunta al nuestro (ServicioDoctor maneja el 2FA)
-    endpointVerificar:"/auth/2fa/paciente/verificar",
-    // ── AJUSTAR: URL del panel del paciente después del login ──
-    urlPanel:    "https://backend-ecosalud.onrender.com/dashboard",
-    campos: [
-      // ── AJUSTAR: campos según lo que pida POST /paciente/login ──
-      // Supuesto actual: email + password
-      { id: "email",    label: "Correo electrónico", placeholder: "paciente@email.com", type: "email",    key: "email" },
-      { id: "password", label: "Contraseña",         placeholder: "••••••••",           type: "password", key: "password" }
-    ],
-    buildBody: (campos) => ({
-      email:    campos.email,
-      password: campos.password
-    }),
-    // false = el portal envía el código 2FA (no el backend del paciente)
-    backend2fa: false
-  },
-
-  clinica: {
-    nombre:      "Clínica",
-    descripcion: "Panel administrativo",
-    // ── AJUSTAR: URL base del ServicioClinicas ──
-    urlBase:     "https://api-clinica-soa.onrender.com",
-    endpointLogin:    "/clinica/login",
-    // ── AJUSTAR: endpoint de verificación 2FA de clínica ──
-    endpointVerificar:"/auth/2fa/clinica/verificar",
-    // ── AJUSTAR: URL del panel de clínica después del login ──
-    urlPanel:    "https://api-clinica-soa.onrender.com/clinica/interfaz",
-    campos: [
-      // Según el openapi: email + password
-      { id: "email",    label: "Correo electrónico", placeholder: "admin@clinica.com", type: "email",    key: "email" },
-      { id: "password", label: "Contraseña",         placeholder: "••••••••",          type: "password", key: "password" }
-    ],
-    buildBody: (campos) => ({
-      email:    campos.email,
-      password: campos.password
-    }),
-    backend2fa: false
-  }
-};
+const URL_DOCTOR   = "";                                          // mismo origen
+const URL_PACIENTE = "https://backend-ecosalud.onrender.com";
+const URL_CLINICA  = "https://api-clinica-soa.onrender.com";
 
 /* ============================================================
-   ESTADO DE LA SESIÓN
+   ESTADO TEMPORAL DE SESIÓN
    ============================================================ */
-let perfilActual   = null;  // "doctor" | "paciente" | "clinica"
-let doctorIdTemp   = null;  // Para el 2FA del doctor (viene del PASO 1)
-let tokenTemp      = null;  // Para el 2FA de paciente/clinica (token provisional)
-let emailTemp      = null;  // Email al que se envió el código 2FA
+let perfilActual  = null;
+let doctorIdTemp  = null;   // Doctor: doctor_id del PASO 1
+let mfaTokenTemp  = null;   // Paciente: mfa_token del PASO 1
+let clinicaTokenTemp = null; // Clínica: token del PASO 1
+
+/* ============================================================
+   HELPERS DE NAVEGACIÓN
+   ============================================================ */
+function ocultarTodo(){
+  document.getElementById("paso-perfil").style.display       = "none";
+  document.getElementById("paso-login").style.display        = "none";
+  document.getElementById("paso-2fa-doctor").style.display   = "none";
+  document.getElementById("paso-2fa-paciente").style.display = "none";
+  document.getElementById("paso-2fa-clinica").style.display  = "none";
+}
+
+function volverAlPerfil(){
+  perfilActual     = null;
+  doctorIdTemp     = null;
+  mfaTokenTemp     = null;
+  clinicaTokenTemp = null;
+  document.querySelectorAll(".perfil-card").forEach(c => c.classList.remove("activo"));
+  limpiarErrores();
+  ocultarTodo();
+  document.getElementById("paso-perfil").style.display = "flex";
+}
+
+function mostrarLogin(){
+  doctorIdTemp     = null;
+  mfaTokenTemp     = null;
+  clinicaTokenTemp = null;
+  limpiarErrores();
+  ocultarTodo();
+  document.getElementById("paso-login").style.display = "block";
+}
+
+function limpiarErrores(){
+  document.querySelectorAll(".msg-error").forEach(e => e.classList.remove("visible"));
+}
+
+function mostrarError(id, msg){
+  const box = document.getElementById(id);
+  box.textContent = msg;
+  box.classList.add("visible");
+}
+
+function setBtnLoading(id, cargando, textoOriginal = "Continuar"){
+  const btn = document.getElementById(id);
+  if(!btn) return;
+  btn.disabled    = cargando;
+  btn.textContent = cargando ? "Verificando..." : textoOriginal;
+}
 
 /* ============================================================
    PASO 1: SELECCIONAR PERFIL
    ============================================================ */
+const CAMPOS = {
+  doctor: [
+    { id:"colegiatura", label:"Número de colegiatura", placeholder:"CMP-001",  type:"text",     autocomplete:"username" },
+    { id:"password",    label:"Contraseña",             placeholder:"••••••••", type:"password", autocomplete:"current-password" }
+  ],
+  paciente: [
+    { id:"email",    label:"Correo electrónico", placeholder:"paciente@email.com", type:"email",    autocomplete:"email" },
+    { id:"password", label:"Contraseña",         placeholder:"••••••••",           type:"password", autocomplete:"current-password" }
+  ],
+  clinica: [
+    { id:"email",    label:"Correo electrónico", placeholder:"admin@ecosalud.com", type:"email",    autocomplete:"email" },
+    { id:"password", label:"Contraseña",         placeholder:"••••••••",           type:"password", autocomplete:"current-password" }
+  ]
+};
+
 function seleccionarPerfil(perfil){
   perfilActual = perfil;
-  const config = SERVICIOS[perfil];
 
-  // Marcar la card activa
+  // Marcar card activa
   document.querySelectorAll(".perfil-card").forEach(c => c.classList.remove("activo"));
   document.getElementById("card-" + perfil).classList.add("activo");
 
-  // Actualizar el badge del formulario
-  document.getElementById("badge-texto").textContent    = config.nombre;
-  document.getElementById("badge-texto-2fa").textContent = config.nombre + " · Verificación";
+  // Actualizar badge
+  const nombres = { doctor:"Doctor", paciente:"Paciente", clinica:"Clínica" };
+  document.getElementById("badge-texto").textContent = nombres[perfil];
 
-  // Generar los campos del formulario
-  const contenedor = document.getElementById("campos-login");
-  contenedor.innerHTML = config.campos.map(c => `
-    <label for="${c.id}">${c.label}</label>
-    <input type="${c.type}" id="${c.id}" placeholder="${c.placeholder}"
-      autocomplete="${c.type === 'password' ? 'current-password' : c.id}"
+  // Generar campos
+  const campos = CAMPOS[perfil];
+  document.getElementById("campos-login").innerHTML = campos.map(c => `
+    <label for="campo-${c.id}">${c.label}</label>
+    <input type="${c.type}" id="campo-${c.id}" placeholder="${c.placeholder}"
+      autocomplete="${c.autocomplete}"
       onkeydown="if(event.key==='Enter') hacerLogin()" />
   `).join("");
 
-  // Limpiar errores anteriores
-  document.getElementById("login-error").classList.remove("visible");
-
-  // Mostrar el formulario de login
-  document.getElementById("paso-perfil").style.display  = "none";
-  document.getElementById("paso-login").style.display   = "block";
-  document.getElementById("paso-login").classList.add("visible");
-  document.getElementById("paso-2fa").style.display     = "none";
-
-  // Focus en el primer campo
-  setTimeout(() => contenedor.querySelector("input")?.focus(), 100);
-}
-
-function volverAlPerfil(){
-  perfilActual = null;
-  document.querySelectorAll(".perfil-card").forEach(c => c.classList.remove("activo"));
-  document.getElementById("paso-perfil").style.display = "flex";
-  document.getElementById("paso-login").classList.remove("visible");
-  document.getElementById("paso-login").style.display  = "none";
-  document.getElementById("paso-2fa").style.display    = "none";
+  limpiarErrores();
+  ocultarTodo();
+  document.getElementById("paso-login").style.display = "block";
+  setTimeout(() => document.querySelector("#campos-login input")?.focus(), 100);
 }
 
 /* ============================================================
-   PASO 2: LOGIN → envía credenciales al servicio correspondiente
+   PASO 2: LOGIN → según el perfil llama al servicio correcto
    ============================================================ */
 async function hacerLogin(){
-  const config  = SERVICIOS[perfilActual];
-  const errorBox = document.getElementById("login-error");
-  const btn      = document.getElementById("btn-acceso");
-  errorBox.classList.remove("visible");
-  btn.disabled   = true;
-  btn.textContent = "Verificando...";
-
-  // Leer valores de los campos
-  const camposValues = {};
-  config.campos.forEach(c => {
-    camposValues[c.id] = document.getElementById(c.id)?.value?.trim() || "";
-  });
-
-  // Validar que no haya campos vacíos
-  const vacio = config.campos.find(c => !camposValues[c.id]);
-  if (vacio){
-    mostrarError("login-error", `El campo "${vacio.label}" es obligatorio.`);
-    btn.disabled    = false;
-    btn.textContent = "Continuar";
-    return;
-  }
+  if(!perfilActual) return;
+  setBtnLoading("btn-login", true);
+  limpiarErrores();
 
   try{
-    const resp = await fetch(config.urlBase + config.endpointLogin, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(config.buildBody(camposValues))
-    });
-
-    const data = await resp.json();
-
-    if (!resp.ok){
-      throw new Error(data.detail || "Credenciales incorrectas.");
-    }
-
-    // ── DOCTOR: el backend ya envió el código 2FA ─────────────────────────
-    if (config.backend2fa){
-      // Guardar doctor_id temporalmente para el PASO 3
-      doctorIdTemp = data.doctor_id;
-      mostrar2FA(data.email_destino || "tu correo registrado");
-
-    // ── PACIENTE / CLÍNICA: el portal debe enviar el código 2FA ──────────
-    }else{
-      // Guardar el token provisional y el email para el PASO 3
-      tokenTemp = data.access_token;
-
-      // ── AJUSTAR: según lo que devuelva el login de cada servicio ─────────
-      // Si el login devuelve el email directamente:
-      emailTemp = data.email || data.correo || data.usuario?.email || null;
-
-      if (!emailTemp){
-        // Si no devuelve el email, pedimos al backend del portal que lo maneje
-        // ── PENDIENTE: implementar POST /auth/2fa/{perfil} en ServicioDoctor ──
-        throw new Error(
-          "⚠️ PENDIENTE: El login de este servicio no devuelve el email. " +
-          "Coordinar con el equipo para que lo incluya en la respuesta."
-        );
-      }
-
-      // Llamar a nuestro backend para que envíe el código 2FA
-      const resp2fa = await fetch(`/auth/2fa/${perfilActual}/enviar`, {
-        method:  "POST",
-        headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({ email: emailTemp, token: tokenTemp })
-      });
-
-      const data2fa = await resp2fa.json();
-      if (!resp2fa.ok) throw new Error(data2fa.detail || "No se pudo enviar el código.");
-
-      mostrar2FA(emailTemp);
-    }
-
+    if(perfilActual === "doctor")   await loginDoctor();
+    if(perfilActual === "paciente") await loginPaciente();
+    if(perfilActual === "clinica")  await loginClinica();
   }catch(err){
     mostrarError("login-error", err.message);
   }finally{
-    btn.disabled    = false;
-    btn.textContent = "Continuar";
+    setBtnLoading("btn-login", false, "Continuar");
   }
 }
 
+/* ── Doctor ── */
+async function loginDoctor(){
+  const colegiatura = document.getElementById("campo-colegiatura")?.value?.trim();
+  const password    = document.getElementById("campo-password")?.value;
+
+  if(!colegiatura || !password) throw new Error("Completa todos los campos.");
+
+  const resp = await fetch(URL_DOCTOR + "/auth/login", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ numero_colegiatura: colegiatura, password })
+  });
+  const data = await resp.json();
+  if(!resp.ok) throw new Error(data.detail || "Credenciales incorrectas.");
+
+  // El backend doctor ya envió el código al email
+  doctorIdTemp = data.doctor_id;
+  document.getElementById("info-2fa-doctor").innerHTML = `
+    <strong>📧 Código enviado a ${data.email_destino || "tu correo"}</strong>
+    Revisa tu bandeja de entrada. Válido por <strong>5 minutos</strong>.
+  `;
+  ocultarTodo();
+  document.getElementById("paso-2fa-doctor").style.display = "block";
+  document.getElementById("codigo-doctor").value = "";
+  setTimeout(() => document.getElementById("codigo-doctor").focus(), 100);
+}
+
+/* ── Paciente ── */
+async function loginPaciente(){
+  const email    = document.getElementById("campo-email")?.value?.trim();
+  const password = document.getElementById("campo-password")?.value;
+
+  if(!email || !password) throw new Error("Completa todos los campos.");
+
+  const resp = await fetch(URL_PACIENTE + "/paciente/login", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ email, password })
+  });
+  const data = await resp.json();
+  if(!resp.ok) throw new Error(data.detail || "Credenciales incorrectas.");
+
+  // ServicioPaciente devuelve mfa_token y ya envió el código al correo
+  mfaTokenTemp = data.mfa_token;
+  const emailDestino = data.email || email;
+
+  document.getElementById("info-2fa-paciente").innerHTML = `
+    <strong>📧 Código enviado a ${emailDestino}</strong>
+    El ServicioPaciente envió un código a tu correo. Válido por <strong>5 minutos</strong>.
+  `;
+  ocultarTodo();
+  document.getElementById("paso-2fa-paciente").style.display = "block";
+  document.getElementById("codigo-paciente").value = "";
+  setTimeout(() => document.getElementById("codigo-paciente").focus(), 100);
+}
+
+/* ── Clínica ── */
+async function loginClinica(){
+  const email    = document.getElementById("campo-email")?.value?.trim();
+  const password = document.getElementById("campo-password")?.value;
+
+  if(!email || !password) throw new Error("Completa todos los campos.");
+
+  const resp = await fetch(URL_CLINICA + "/clinica/login", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ email, password })
+  });
+  const data = await resp.json();
+  if(!resp.ok) throw new Error(data.detail || "Credenciales incorrectas.");
+
+  // Guardamos lo que devuelva el login (token u otro identificador)
+  clinicaTokenTemp = data.access_token || data.token || JSON.stringify(data);
+
+  ocultarTodo();
+  document.getElementById("paso-2fa-clinica").style.display = "block";
+  document.getElementById("codigo-clinica").value = "";
+  setTimeout(() => document.getElementById("codigo-clinica").focus(), 100);
+}
+
 /* ============================================================
-   PASO 3: VERIFICAR CÓDIGO 2FA → recibe JWT y redirige al panel
+   PASO 3: VERIFICAR 2FA → según el perfil
    ============================================================ */
-async function verificarCodigo(){
-  const config   = SERVICIOS[perfilActual];
-  const codigo   = document.getElementById("codigo-2fa").value.trim();
-  const errorBox = document.getElementById("2fa-error");
-  errorBox.classList.remove("visible");
 
-  if (codigo.length !== 6){
-    mostrarError("2fa-error", "El código debe tener exactamente 6 dígitos.");
-    return;
-  }
-
-  const btn = document.querySelector("#paso-2fa .btn-acceso");
-  btn.disabled    = true;
-  btn.textContent = "Verificando...";
+/* ── Doctor ── */
+async function verificarDoctor(){
+  const codigo = document.getElementById("codigo-doctor").value.trim();
+  if(codigo.length !== 6){ mostrarError("error-2fa-doctor", "El código debe tener 6 dígitos."); return; }
 
   try{
-    let urlVerificar, bodyVerificar;
-
-    // ── DOCTOR: usa nuestro endpoint /auth/verificar ──────────────────────
-    if (config.backend2fa){
-      urlVerificar  = config.urlBase + config.endpointVerificar;
-      bodyVerificar = { doctor_id: doctorIdTemp, codigo: codigo };
-
-    // ── PACIENTE / CLÍNICA: usa el endpoint del portal ────────────────────
-    }else{
-      urlVerificar  = config.endpointVerificar;
-      bodyVerificar = { email: emailTemp, codigo: codigo, token: tokenTemp };
-    }
-
-    const resp = await fetch(urlVerificar, {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(bodyVerificar)
+    const resp = await fetch(URL_DOCTOR + "/auth/verificar", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ doctor_id: doctorIdTemp, codigo })
     });
-
     const data = await resp.json();
+    if(!resp.ok) throw new Error(data.detail || "Código incorrecto o expirado.");
 
-    if (!resp.ok){
-      throw new Error(data.detail || "Código incorrecto o expirado.");
-    }
-
-    // ── Login completo: guardar token y redirigir al panel ─────────────────
-    const token = data.access_token || tokenTemp;
-    sessionStorage.setItem(`ecosalud_token_${perfilActual}`, token);
-    sessionStorage.setItem(`ecosalud_perfil`, perfilActual);
-
-    // Redirigir al panel del perfil
-    window.location.href = config.urlPanel;
+    // Guardar token y redirigir al panel del doctor
+    sessionStorage.setItem("ecosalud_token_doctor", data.access_token);
+    sessionStorage.setItem("ecosalud_doctor", JSON.stringify({
+      doctor_id:          data.doctor_id,
+      nombre:             data.nombre,
+      especialidad:       data.especialidad,
+      numero_colegiatura: data.numero_colegiatura
+    }));
+    window.location.href = "/panel";
 
   }catch(err){
-    mostrarError("2fa-error", err.message);
-    btn.disabled    = false;
-    btn.textContent = "Verificar y entrar";
+    mostrarError("error-2fa-doctor", err.message);
   }
 }
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
-function mostrar2FA(emailDestino){
-  document.getElementById("paso-login").classList.remove("visible");
-  document.getElementById("paso-login").style.display  = "none";
-  document.getElementById("paso-2fa").style.display    = "block";
-  document.getElementById("paso-2fa").classList.add("visible");
+/* ── Paciente ── */
+async function verificarPaciente(){
+  const codigo = document.getElementById("codigo-paciente").value.trim();
+  if(codigo.length !== 6){ mostrarError("error-2fa-paciente", "El código debe tener 6 dígitos."); return; }
 
-  document.getElementById("info-2fa").innerHTML = `
-    <strong>📧 Código enviado</strong>
-    Revisa el correo de <strong>${emailDestino}</strong>.
-    Válido por <strong>5 minutos</strong>.
-  `;
+  try{
+    const resp = await fetch(URL_PACIENTE + "/paciente/verify-mfa", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ mfa_token: mfaTokenTemp, code: codigo })
+    });
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.detail || "Código incorrecto o expirado.");
 
-  document.getElementById("codigo-2fa").value = "";
-  document.getElementById("2fa-error").classList.remove("visible");
-  setTimeout(() => document.getElementById("codigo-2fa").focus(), 100);
+    // Guardar token y redirigir al panel del paciente
+    sessionStorage.setItem("ecosalud_token_paciente", data.access_token || mfaTokenTemp);
+    window.location.href = "https://frontend-ecosalud.onrender.com/";
+
+  }catch(err){
+    mostrarError("error-2fa-paciente", err.message);
+  }
 }
 
-function volverAlLogin(){
-  doctorIdTemp = null;
-  tokenTemp    = null;
-  emailTemp    = null;
-  document.getElementById("2fa-error").classList.remove("visible");
-  document.getElementById("codigo-2fa").value = "";
-  document.getElementById("paso-2fa").style.display    = "none";
-  document.getElementById("paso-login").style.display  = "block";
-  document.getElementById("paso-login").classList.add("visible");
-}
+/* ── Clínica ── */
+async function verificarClinica(){
+  const codigo = document.getElementById("codigo-clinica").value.trim();
+  if(codigo.length !== 6){ mostrarError("error-2fa-clinica", "El código debe tener 6 dígitos."); return; }
 
-function mostrarError(idBox, mensaje){
-  const box = document.getElementById(idBox);
-  box.textContent = mensaje;
-  box.classList.add("visible");
+  try{
+    const resp = await fetch(URL_CLINICA + "/clinica/verificar-2fa", {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ codigo_2fa: codigo })
+    });
+    const data = await resp.json();
+    if(!resp.ok) throw new Error(data.detail || "Código incorrecto. Verifica tu aplicación de autenticación.");
+
+    // Guardar token y redirigir al panel de clínica
+    sessionStorage.setItem("ecosalud_token_clinica", data.access_token || clinicaTokenTemp);
+    window.location.href = URL_CLINICA + "/clinica/interfaz";
+
+  }catch(err){
+    mostrarError("error-2fa-clinica", err.message);
+  }
 }
 </script>
-
 </body>
 </html>
