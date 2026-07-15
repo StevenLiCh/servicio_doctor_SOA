@@ -354,6 +354,7 @@ let perfilActual  = null;
 let doctorIdTemp  = null;   // Doctor: doctor_id del PASO 1
 let mfaTokenTemp  = null;   // Paciente: mfa_token del PASO 1
 let clinicaTokenTemp = null; // Clínica: token del PASO 1
+let clinicaEmailTemp = null; // Clínica: email usado en el login
 
 /* ============================================================
    HELPERS DE NAVEGACIÓN
@@ -536,6 +537,7 @@ async function loginClinica(){
 
   // Guardamos lo que devuelva el login (token u otro identificador)
   clinicaTokenTemp = data.access_token || data.token || JSON.stringify(data);
+  clinicaEmailTemp = email;
 
   ocultarTodo();
   document.getElementById("paso-2fa-clinica").style.display = "block";
@@ -605,7 +607,7 @@ async function verificarClinica(){
   try{
     const resp = await fetch(URL_CLINICA + "/clinica/verificar-2fa", {
       method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ codigo_2fa: codigo })
+      body: JSON.stringify({ email: clinicaEmailTemp, codigo_2fa: codigo })
     });
     const data = await resp.json();
     if(!resp.ok) throw new Error(data.detail || "Código incorrecto. Verifica tu aplicación de autenticación.");
